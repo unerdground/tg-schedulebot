@@ -108,7 +108,7 @@ def recognize_date(date):
 # MAIN FUNCTION
 # PROCESSING UPDATES AND GIVES RESPONSE
 def main():
-    SBot = BotHandler('723994825:AAHwsrRH0Q_6pJ36KA8PtYCk6yf4bQT3KxE')  # CREATE OBJECT WITH DEFINED TELEGRAM API TOKEN
+    SBot = BotHandler('your_token_here')  # CREATE OBJECT WITH DEFINED TELEGRAM API TOKEN
     database = SQL_Handler()
     offset = None  # INITIAL OFFSET
 

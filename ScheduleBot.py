@@ -117,9 +117,6 @@ def main():
     # (2) FOR EVERY OBJECT IN UPDATE,
     # READ TEXT AND SEND RESPONSE
     while True:
-        now = datetime.datetime.now()
-        time = now.strftime("%d") + '/' + now.strftime("%m") + '/' + now.strftime("%y") + '\n' + now.strftime("%H") + ':' + now.strftime("%M")
-
         # (1)
         update = SBot.get_updates(offset)
         if len(update) > 0:

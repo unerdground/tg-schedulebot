@@ -72,41 +72,7 @@ class SQL_Handler():
     # CLOSES CONNECTION TO DATABASE
     '''def close_connecion(self):
         self.database.shutdown()'''
-
-
-# ENUMERATED CLASS FOR WEEKDAYS AND ALIASES
-"""
-class Weekday(Enum):
-    Monday = 1
-    monday = 1
-    Mon = 1
-    mon = 1
-    Tuesday = 2
-    tuesday = 2
-    Tue = 2
-    tue = 2
-    Wednesday = 3
-    wednesday = 3
-    Wed = 3
-    wed = 3
-    Thursday = 4
-    thursday = 4
-    Thur = 4
-    thur = 4
-    Friday = 5
-    friday = 5
-    Fri = 5
-    fri = 5
-    Saturday = 6
-    saturday = 6
-    Sat = 6
-    sat = 6
-    Sunday = 7
-    sunday = 7
-    Sun = 7
-    sun = 7
-"""
-
+    
 
 # GETS USER INPUT AS A PARAMETER AND CHECK IF IT'S DATE OR NOT
 # IF YES RETURN DATE IN FORMAT YYYYMMDD (AS STORED IN .ics CALENDAR)

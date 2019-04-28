@@ -1,106 +1,42 @@
-# SCRIPT PARSES DATA FROM .ics FILE
-# PARSES DATE, CLASSES NAME, START TIME, END TIME, LOCATION
-# PARSED DATA STORED IN DATABASE "schedule" IN TABLES WITH NAMES IN FORMAT "d"+YYYYMMDD
+"""This script parses data from .ics file and stores it in database
+in tables with names 'dYYYYMMDD'
+Data stored in format 'name, start time, end time'"""
 
-import mysql.connector
-import re
-
-
-# SQL OPERATIONS
-class SQLHandler:
-
-	# CONNECTION TO DATABASE
-	def __init__(self):
-		self.database = mysql.connector.connect(
-			host="localhost",
-			user="root",
-			passwd="root",
-			database="schedule"
-		)
-
-		self.mycursor = self.database.cursor()
-
-	# CREATE TABLE WITH NAME 'name' AND DEFINED COLUMNS
-	def create_table(self, name):
-		sql = "CREATE TABLE IF NOT EXISTS " + name + " (name VARCHAR(50), dtstart VARCHAR(2), dtend VARCHAR(2), location VARCHAR(50))"
-		self.mycursor.execute(sql, name)
-
-	# WRITE DATA 'data' INTO TABLE 'name'
-	def write_record(self, name, data):
-		sql = "INSERT INTO " + name + " VALUES (%s, %s, %s, %s)"
-		self.mycursor.execute(sql, data)
-
-		self.database.commit()
+# 'ics' LIBRARY NEEDED TO BE INSTALLED
+from ics import Calendar
+import SQLHandler
 
 
+"""Parses data from .ics file"""
 class Parser:
 
-	# OPEN FILE 'file'
-	def __init__(self, file):
-		self.file = open(file)
-		self.lines = self.file.readlines()
+    """Constructor opens file with name 'filename'"""
+    def __init__(self, filename):
+        with open(filename, encoding='utf-8') as file:
+            self.calendar = Calendar(file).events
 
-	# CLOSE FILE
-	def close_file(self):
-		self.file.close()
+    """Returns date of event in format 'dYYYYMMDD' as required to database"""
+    def get_date(self, index):
+        date = self.calendar[index].begin.datetime.strftime("%Y%m%d")
+        return "d" + date
 
-	# RETURNS EXACT LINE OF FILE
-	def read_line(self, line):
-		return self.lines[line]
-
-	# SEARCHES IN LINE PREDEFINED REGEX TEMPLATES
-	def find_in_line(self, line, search_type):
-		if search_type == "date":
-			return re.search("20[0-9]{6}", line).group()  # SEARCH DATE IN FORMAT YYYYMMDD
-		elif search_type == "dt":
-			find = re.search("[0-9]{4}00", line).group()  # SEARCH TIMESTAMP IN FORMAT HHMM00
-			return find.replace("0000", "")
-		elif search_type == "loc":
-			find = re.search(", .*", line).group()  # SEARCH STRING
-			return find.replace(", ", "")
-		elif search_type == "name":
-			find = re.search(":.[^,]*,", line).group()  # SEARCH STRING
-			return find.replace(":", "")
+    """Returns tuple of data for database"""
+    def get_data(self, index):
+        dtstart = self.calendar[index].begin.datetime.strftime("%H:%M")
+        dtend = self.calendar[index].end.datetime.strftime("%H:%M")
+        name = self.calendar[index].name
+        res = (name, dtstart, dtend)
+        return res
 
 
+"""Main function, handles parsing"""
 def start_parse():
+    parse = Parser("calendar.ics")
+    database = SQLHandler.SQLHandler()
 
-	# SQL AND PARSE OBJECTS
-	database = SQLHandler()
-	parse = Parser("calendar.ics")
+    for index in range(len(parse.calendar) - 1):
+        database.create_table(parse.get_date(index))
+        database.write_record(parse.get_date(index), parse.get_data(index))
 
-	# STRING WITH FIRST LOCATION
-	# AT STRING i+1 STORED DATE AND START TIME
-	# AT STRING i+2 STORED END TIME
-	# AT STRING i+1 STORED NAME AND LOCATION
-	# AT STRING i+6 STORED INFO ABOUT NEXT OBJECT
-	i = 6
-	while i < len(parse.lines):
-		# PARSE DATE AND START TIME
-		date = "D" + parse.find_in_line(parse.read_line(i), "date")
-		dtstart = parse.find_in_line(parse.read_line(i), "dt")
-
-		# GO TO NEXT LINE
-		i += 2
-		dtend = parse.find_in_line(parse.read_line(i), "dt")  # PARSE END TIME
-
-		# GO TO NEXT LINE
-		i += 1
-		loc = parse.find_in_line(parse.read_line(i), "loc")  # PARSE LOCATION
-		name = parse.find_in_line(parse.read_line(i), "name")  # PARSE NAME
-
-		#CREATE TABLE FOR DATE 'date'
-		database.create_table(date)
-
-		# FILL ARRAY WITH PARSED DATA
-		data = (name, dtstart, dtend, loc)
-
-		# WRITE DATA TO DATABASE
-		database.write_record(date, data)
-
-		# GO TO NEXT RECORD
-		i += 6
-
-	parse.close_file()
 
 start_parse()

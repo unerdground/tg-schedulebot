@@ -1,5 +1,6 @@
 """This script runs Telegram bot """
 
+#Libraries 'dateparser' and 'requests' needed to be installed
 import dateparser
 import datetime
 import SQLHandler

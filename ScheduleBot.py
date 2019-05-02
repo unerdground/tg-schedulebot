@@ -40,11 +40,6 @@ class BotHandler:
         return data[-1]['update_id']
 
 
-"""Check if it's a date or not"""
-def recognize_date(text):
-    return dateparser.parse(text, locales=['en'], settings={'PREFER_DATES_FROM': 'future', 'DATE_ORDER': 'DMY'})
-
-
 """Recognize input command"""
 def response_commands(text):
     if text in ['/start', '/help']:
@@ -59,10 +54,12 @@ def response_commands(text):
 
 """Recognize input text"""
 def response_text(text):
-    if recognize_date(text) is None:
+    # Check if it's date
+    rec = dateparser.parse(text, locales=['en'], settings={'PREFER_DATES_FROM': 'future', 'DATE_ORDER': 'DMY'})
+    if rec) is None:
         return 0
     else:
-        return recognize_date(text).strftime("d%Y%m%d")
+        return rec.strftime("d%Y%m%d")
 
 
 """Create text to response"""

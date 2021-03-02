@@ -1,5 +1,7 @@
 # tg-schedulebot
 
+DISCONTINUED
+
 Telegram Chat bot for easier access to university classes schedule
 
 ScheduleParser.py parses data from .ics file and write it to the database
